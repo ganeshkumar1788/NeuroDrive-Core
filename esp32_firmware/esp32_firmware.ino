@@ -25,7 +25,6 @@ String local_mode = "CALM";
 int final_pwm = 0;
 String current_led_state = "GREEN";
 int current_buzzer_state = 0;
-bool rx_eyes_open = true; // Added for immediate override
 
 unsigned long lastTSUpdate = 0;
 const long tsInterval = 15000; // 15 sec
@@ -35,9 +34,12 @@ void setup() {
 
   // WiFi
   WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
+    Serial.print(".");
   }
+  Serial.println("\nWiFi Connected!");
 
   // Motor
   pinMode(ENA_PIN, OUTPUT);
@@ -52,80 +54,100 @@ void setup() {
   pinMode(PIN_BLUE, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
 
-  // PWM setup
+  // PWM (high freq → less noise)
   ledcAttach(ENA_PIN, 20000, 8);
 }
 
 void loop() {
+
   // -------- 1. READ POT --------
   pot_raw = analogRead(POT_PIN);
   pot_pwm = map(pot_raw, 0, 4095, 0, 255);
+
+  // -------- 2. MODE --------
   local_mode = (pot_pwm <= 170) ? "CALM" : "AGGRESSIVE";
 
-  // -------- 2. SEND SENSOR DATA --------
+  Serial.printf("ADC: %d | PWM: %d | Mode: %s\n", pot_raw, pot_pwm,
+                local_mode.c_str());
+
+  // -------- 3. EDGE MOTOR CONTROL (REFINED FOR OVERRIDE) --------
+  // Default to local logic until Serial override arrives
+  if (local_mode == "CALM") {
+    final_pwm = pot_pwm;
+  } else if (local_mode == "AGGRESSIVE") {
+    final_pwm = constrain(pot_pwm, 120, 150);
+  }
+
+  // -------- 4. SEND SENSOR DATA --------
   StaticJsonDocument<128> sensorDoc;
   sensorDoc["pot"] = pot_pwm;
   sensorDoc["mode"] = local_mode;
   serializeJson(sensorDoc, Serial);
   Serial.println();
 
-  // -------- 3. RECEIVE CONTROL & OVERRIDE --------
+  // -------- 5. RECEIVE CONTROL (LED + BUZZER + OVERRIDE) --------
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
     StaticJsonDocument<256> controlDoc;
     DeserializationError error = deserializeJson(controlDoc, input);
 
     if (!error) {
-      if (controlDoc.containsKey("eyes_open")) rx_eyes_open = controlDoc["eyes_open"];
       String rx_mode = controlDoc["mode"] | "CALM";
       int rx_pwm = controlDoc["pwm"] | 0;
       current_led_state = controlDoc["led"] | "GREEN";
       current_buzzer_state = controlDoc["buzzer"] | 0;
 
-      // MISSION CRITICAL OVERRIDE (Dashboard controlled speed)
-      final_pwm = rx_pwm; 
-
-      // 🚨 FAST-PATH HARDWARE OVERRIDE
-      if (!rx_eyes_open) {
-         current_led_state = "RED";
-         current_buzzer_state = 1;
+      // ⚡ MISSION CRITICAL OVERRIDE
+      if (rx_mode == "FATIGUED" || rx_mode == "CRITICAL") {
+        final_pwm = rx_pwm; // Backend takes control for safety
       }
 
       // LED Control
       if (current_led_state == "GREEN") {
-        digitalWrite(PIN_RED, LOW); digitalWrite(PIN_GREEN, HIGH); digitalWrite(PIN_BLUE, LOW);
+        digitalWrite(PIN_RED, LOW);
+        digitalWrite(PIN_GREEN, HIGH);
+        digitalWrite(PIN_BLUE, LOW);
       } else if (current_led_state == "BLUE") {
-        digitalWrite(PIN_RED, LOW); digitalWrite(PIN_GREEN, LOW); digitalWrite(PIN_BLUE, HIGH);
+        digitalWrite(PIN_RED, LOW);
+        digitalWrite(PIN_GREEN, LOW);
+        digitalWrite(PIN_BLUE, HIGH);
       } else if (current_led_state == "RED") {
-        digitalWrite(PIN_RED, HIGH); digitalWrite(PIN_GREEN, LOW); digitalWrite(PIN_BLUE, LOW);
+        digitalWrite(PIN_RED, HIGH);
+        digitalWrite(PIN_GREEN, LOW);
+        digitalWrite(PIN_BLUE, LOW);
       }
 
       // Buzzer
-      digitalWrite(BUZZER_PIN, (current_buzzer_state == 1) ? HIGH : LOW);
+      digitalWrite(BUZZER_PIN, current_buzzer_state ? HIGH : LOW);
     }
   }
 
-  // Apply final PWM
+  // Apply final PWM (after potential Serial Override)
   ledcWrite(ENA_PIN, final_pwm);
 
-  // -------- 4. DEBUG (EXTENDED TELEMETRY) --------
-  Serial.printf("ADC: %d | Pot PWM: %d | Mode: %s | Motor: %d | LED: %s | Buzzer: %d\n", 
-                pot_raw, pot_pwm, local_mode.c_str(), final_pwm, current_led_state.c_str(), current_buzzer_state);
-
-  // -------- 5. THINGSPEAK --------
+  // -------- 6. THINGSPEAK --------
   if (millis() - lastTSUpdate >= tsInterval) {
+
     if (WiFi.status() == WL_CONNECTED) {
+
       WiFiClient client;
       HTTPClient http;
+
       int modeCode = (local_mode == "CALM") ? 0 : 1;
+
       String url = String(serverPath) + "?api_key=" + apiKey +
                    "&field1=" + String(pot_pwm) + "&field2=" + String(modeCode);
+
       http.begin(client, url);
-      http.GET();
+      int httpResponseCode = http.GET();
+
+      Serial.print("ThingSpeak Code: ");
+      Serial.println(httpResponseCode);
+
       http.end();
       lastTSUpdate = millis();
     }
   }
 
-  delay(50);
+  delay(500);
 }
