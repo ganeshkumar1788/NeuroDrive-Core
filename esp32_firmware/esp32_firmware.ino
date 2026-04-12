@@ -25,6 +25,7 @@ String local_mode = "CALM";
 int final_pwm = 0;
 String current_led_state = "GREEN";
 int current_buzzer_state = 0;
+bool rx_eyes_open = true; // Added for immediate override
 
 unsigned long lastTSUpdate = 0;
 const long tsInterval = 15000; // 15 sec
@@ -75,6 +76,7 @@ void loop() {
     DeserializationError error = deserializeJson(controlDoc, input);
 
     if (!error) {
+      if (controlDoc.containsKey("eyes_open")) rx_eyes_open = controlDoc["eyes_open"];
       String rx_mode = controlDoc["mode"] | "CALM";
       int rx_pwm = controlDoc["pwm"] | 0;
       current_led_state = controlDoc["led"] | "GREEN";
@@ -82,6 +84,12 @@ void loop() {
 
       // MISSION CRITICAL OVERRIDE (Dashboard controlled speed)
       final_pwm = rx_pwm; 
+
+      // 🚨 FAST-PATH HARDWARE OVERRIDE
+      if (!rx_eyes_open) {
+         current_led_state = "RED";
+         current_buzzer_state = 1;
+      }
 
       // LED Control
       if (current_led_state == "GREEN") {

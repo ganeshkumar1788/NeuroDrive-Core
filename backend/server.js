@@ -214,6 +214,7 @@ setInterval(() => {
   // 4. OUTPUT TO HARDWARE (CENTRAL COMMAND OVERRIDE)
   if (isSerialAlive && port && port.isOpen) {
     const payload = {
+      eyes_open: eyeTracker.eyes_open,
       mode: latestData.mode,
       pwm: latestData.pwm,
       led: latestData.led,
