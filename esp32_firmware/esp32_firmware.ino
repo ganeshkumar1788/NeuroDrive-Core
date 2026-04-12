@@ -100,9 +100,9 @@ void loop() {
   // Apply final PWM
   ledcWrite(ENA_PIN, final_pwm);
 
-  // -------- 4. DEBUG --------
-  Serial.printf("ADC: %d | Pot PWM: %d | Mode: %s | Motor PWM: %d\n", 
-                pot_raw, pot_pwm, local_mode.c_str(), final_pwm);
+  // -------- 4. DEBUG (EXTENDED TELEMETRY) --------
+  Serial.printf("ADC: %d | Pot PWM: %d | Mode: %s | Motor: %d | LED: %s | Buzzer: %d\n", 
+                pot_raw, pot_pwm, local_mode.c_str(), final_pwm, current_led_state.c_str(), current_buzzer_state);
 
   // -------- 5. THINGSPEAK --------
   if (millis() - lastTSUpdate >= tsInterval) {
