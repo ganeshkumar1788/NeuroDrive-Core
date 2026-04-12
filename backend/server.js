@@ -211,10 +211,11 @@ setInterval(() => {
   latestData.pwm = Math.round((targetSpeed / 180) * 255);
   latestData.emotion = latestData.mode === "CALM" ? "CALM" : latestData.mode === "AGGRESSIVE" ? "STRESSED" : "DROWSY";
 
-  // 4. OUTPUT TO HARDWARE (ONLY IF SERIAL ALIVE)
+  // 4. OUTPUT TO HARDWARE (RELAY VISION TELEMETRY TO EDGE)
   if (isSerialAlive && port && port.isOpen) {
     const payload = {
-      mode: latestData.mode,
+      eyes_open: eyeTracker.eyes_open,
+      eye_duration: eyeTracker.eye_closed_duration,
       pwm: latestData.pwm,
       led: latestData.led,
       buzzer: latestData.buzzer
