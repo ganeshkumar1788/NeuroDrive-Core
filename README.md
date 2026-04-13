@@ -1,11 +1,11 @@
-# 🏎️ NeuroDrive AI: Core Intelligence System
+# 🏎️ FUTURE DRIVEN: Core Intelligence System
 
 [![Platform: ESP32](https://img.shields.io/badge/Hardware-ESP32-E67E22?logo=espressif)](https://www.espressif.com/)
 [![Backend: Node.js](https://img.shields.io/badge/Backend-Node.js-339933?logo=node.js)](https://nodejs.org/)
 [![Frontend: React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://reactjs.org/)
 [![Safety: CRITICAL Override](https://img.shields.io/badge/Safety-CRITICAL_Override-red)]()
 
-NeuroDrive AI is a state-of-the-art, emotion-aware vehicle control system that bridges real-time hardware telemetry with a cinematic, glassmorphic digital cockpit. Built for high-performance and driver safety, the system uses a dual-redundancy failover engine to ensure uninterupted operation across Serial and Cloud communication channels.
+FUTURE DRIVEN is a state-of-the-art, emotion-aware vehicle control system that bridges real-time hardware telemetry with a cinematic, glassmorphic digital cockpit. Built for high-performance and driver safety, the system uses a dual-redundancy failover engine to ensure uninterupted operation across Serial and Cloud communication channels.
 
 ## 🚀 Key Features
 

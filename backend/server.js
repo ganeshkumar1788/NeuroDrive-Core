@@ -59,6 +59,12 @@ function initSerial() {
         latestData.espStatus = "SERIAL MODE";
       }
     });
+    
+    // 🔥 CRITICAL: Prevent crash on serial error events
+    port.on('error', (err) => {
+      console.error(`📡 Serial Error: ${err.message}`);
+      latestData.espStatus = "CLOUD MODE";
+    });
 
     parser.on('data', (data) => {
       try {
@@ -220,7 +226,11 @@ setInterval(() => {
       led: latestData.led,
       buzzer: latestData.buzzer
     };
-    port.write(JSON.stringify(payload) + '\n');
+    try {
+      port.write(JSON.stringify(payload) + '\n');
+    } catch (e) {
+      console.error("Failed to write to serial port:", e.message);
+    }
   }
 
 }, 100);

@@ -259,18 +259,18 @@ export default function Dashboard() {
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-25 animate-pulse" />
                 <div className={`relative px-4 py-1.5 rounded-full border backdrop-blur-xl flex items-center gap-3 ${theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-white/80 border-slate-200 shadow-sm'}`}>
                   <Wifi className="w-4 h-4 text-blue-400 animate-pulse" />
-                  <span className="text-[10px] font-black tracking-[0.4em] uppercase opacity-70">NeuroDrive Core</span>
+                  <span className="text-[10px] font-black tracking-[0.4em] uppercase opacity-70">FUTURE DRIVEN CORE</span>
                 </div>
              </div>
              
              <div className="flex gap-4 opacity-40">
                 <div className="flex items-center gap-2">
                    <Wifi className="w-3 h-3" />
-                   <span className="text-[8px] font-bold uppercase tracking-widest">v2.4.0-STABLE</span>
+                   <span className="text-[8px] font-bold uppercase tracking-widest">v3.0.0-FUTURE</span>
                 </div>
                 <div className="flex items-center gap-2">
                    <Battery className="w-3 h-3" />
-                   <span className="text-[8px] font-bold uppercase tracking-widest">SYNC: SERIAL/COM3</span>
+                   <span className="text-[8px] font-bold uppercase tracking-widest">SYNC: SERIAL/CLOUD</span>
                 </div>
              </div>
           </motion.div>

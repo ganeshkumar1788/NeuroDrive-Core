@@ -29,7 +29,7 @@ export default function Hero() {
             className={`flex items-center gap-4 px-6 py-2 rounded-full border backdrop-blur-xl ${theme === 'dark' ? 'border-white/10 bg-white/5' : 'border-slate-200 bg-white/80'}`}
           >
             <Activity className="w-5 h-5 text-[#38BDF8] animate-pulse" />
-            <span className={`text-[10px] font-black tracking-[0.5em] uppercase ${theme === 'dark' ? 'text-white/80' : 'text-slate-600'}`}>NeuroDrive AI • v2.0</span>
+            <span className={`text-[10px] font-black tracking-[0.5em] uppercase ${theme === 'dark' ? 'text-white/80' : 'text-slate-600'}`}>FUTURE DRIVEN • v3.0</span>
           </motion.div>
 
           <motion.button
